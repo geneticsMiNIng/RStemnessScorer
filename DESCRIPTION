@@ -7,7 +7,10 @@ Description: The package is a set of tools to create classifiers based on PCBC(s
 Depends:
     R (>= 3.3.0),
     glmnet,
-    randomForest
+    randomForest,
+    doSNOW,
+    parallel,
+    ggplot2
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
