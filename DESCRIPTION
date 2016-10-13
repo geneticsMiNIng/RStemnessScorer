@@ -11,7 +11,8 @@ Depends:
     doSNOW,
     parallel,
     ggplot2,
-    faraway
+    faraway,
+    gridExtra
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
