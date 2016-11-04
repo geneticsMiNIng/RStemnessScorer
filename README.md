@@ -1,2 +1,2 @@
 # RStemnessScorer
-R package containing tools to create and manage stamness classifiers
+R package containing tools to create and manage stemness classifiers
