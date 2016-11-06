@@ -4,7 +4,7 @@
 \alias{buildScorer_RF}
 \title{Random Forest Classifier}
 \usage{
-buildScorer_RF(xdata, ydata, ntree = 500, njob = 1)
+buildScorer_RF(xdata, ydata, ntree = 500, njob = 1, ...)
 }
 \arguments{
 \item{xdata}{The training data. `data.frame` or `matrix` object with numeric columns.}

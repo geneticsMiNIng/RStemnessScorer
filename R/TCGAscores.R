@@ -30,7 +30,7 @@
 #' @importFrom ggplot2 geom_boxplot
 #' @export
 
-TCGAscores <- function(tcga, objects, resp=2, verbose=TRUE){
+testTumor <- function(tcga, objects, resp=2, verbose=TRUE){
   objtype <- class(objects)
   if( objtype %in% c('randomForest','cv.glmnet') ){
     objects <- list(objects)
@@ -40,10 +40,13 @@ TCGAscores <- function(tcga, objects, resp=2, verbose=TRUE){
   # stopifnot( length(unique(objtypes))==1 ) #?
   stopifnot( all(unique(objtypes) %in% c("cv.glmnet","randomForest")) )
   if( is.null(names(objects)) ) stop('Objects are not named. Names are required.')
-  stopifnot(class(tcga[,1]) %in% c("factor"))
-  coltypes <- names(table(sapply(tcga[,-1],class)))
+  coltypes <- names(table(sapply(tcga[,-c(1,2)],class)))
   if( any(coltypes!='numeric') ) stop('Predictors are not class of numeric.')
-  tcga <- split(tcga, tcga[,1])
+  tcga <- split(tcga, tcga$cancer)
+  sc <- function(df){
+    out <- scorer(df, model, resp=resp)
+  }
+  la
   lapply(names(objects), function(objnm){
     df <- lapply( names(tcga), function(datanm){
       if( verbose )

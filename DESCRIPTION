@@ -12,7 +12,10 @@ Depends:
     parallel,
     ggplot2,
     faraway,
-    gridExtra
+    gridExtra,
+    data.table,
+    ggfortify,
+    digest
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

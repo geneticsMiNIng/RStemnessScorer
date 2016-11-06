@@ -4,31 +4,31 @@
 #'
 #' @param fname name for target .csv data file and its metadata. Data file should be written
 #' as \code{fname}.csv and metadata as meta_\code{fname}.csv.
-#' @return \code{ggplot} data.frame object n x p, where n is for number of patients and p
+#' @return \code{ggplot} data.table object n x p, where n is for number of patients and p
 #' for number of markers. First column of the object contains sample class (according to 
 #' metadata \code{Diffname_short} information).
 #' @author Katarzyna Sobiczewska
-#' @examples
-#' 
-#' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 geom_bar
-#' @importFrom ggplot2 theme
+#' @import data.table
 #' @export
 
-loadPCBC <- function(data, id='UID', class_column='Diffname_short'){
-  PCBC.data <- read.delim2(sprintf('data/%s.csv', data), sep=',')
-  PCBC.data.meta <- read.table(sprintf('data/meta_%s.csv', data), sep=',', header=TRUE)
+loadPCBC <- function(path, data, meta_id='UID', meta_class='Diffname_short'){
+
+  message('Load PCBC dataset...')
+  PCBC.data <- fread(file.path(path, paste0(data, '.csv')), header=TRUE)
+  PCBC.data.meta <- fread(file.path(path, paste0('meta_',data, '.csv')), header = TRUE,
+                          select=c(meta_id, meta_class))
+  message('\tUnify metadata and data sample names...')
+  data_id <- colnames(PCBC.data)[1]
+  temp_id <- PCBC.data[[data_id]]
+  PCBC.data[[data_id]] <- sapply(temp_id, function(x) gsub('-','\\.',as.character(x)))
+  temp_id <- PCBC.data.meta[[meta_id]]
+  PCBC.data.meta[[meta_id]] <- sapply(temp_id, function(x) gsub('-','\\.',as.character(x)))
   
-  samples <- PCBC.data['X']
-  samples <- sapply(samples, function(x) gsub('-','\\.',as.character(x)))
-  PCBC.data <- as.data.frame(PCBC.data[,-c(1,2)], stringsAsFactors = FALSE)
-  
-  # PCBC.data <- sapply(PCBC.data, as.numeric)
-  # rownames(PCBC.data) <- samples
-  
-  PCBC.data.meta <- PCBC.data.meta[,c(id,class_name)]
-  rownames(PCBC.data.meta) <- gsub("-",".",PCBC.data.meta[,1])
-  PCBC.data <- data.frame(class=PCBC.data.meta[samples,2], PCBC.data)
-  
+  message('\tJoin class column...')
+  setkeyv(PCBC.data.meta, meta_id)
+  setkeyv(PCBC.data, data_id)
+  PCBC.data <- PCBC.data.meta[PCBC.data, nomatch=0]    # inner join
+  setkeyv(PCBC.data, meta_class)
+  message(sprintf('\tDataset %d x %d is loaded.', dim(PCBC.data)[1], dim(PCBC.data)[2]))
   return(PCBC.data)
 }

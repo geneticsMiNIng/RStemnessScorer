@@ -14,10 +14,6 @@
 
 buildScorer_LRlasso <- function(xdata,ydata, cv.measure, njob=1, ...){
 
-  stay <- nonNA(cbind(xdata, ydata))
-  xdata <- xdata[stay,]
-  ydata <- ydata[stay]
-
   if( njob>1 ){
     cl <- makeCluster(njob)
     registerDoSNOW(cl)

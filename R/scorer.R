@@ -21,7 +21,7 @@ scorer <- function(xtest, object, resp=2){
   stopifnot( class(object) %in% c('cv.glmnet','randomForest') )
   stopifnot( resp %in% 1:2 )
   if( class(object) == 'cv.glmnet' )
-    out <- scorer_LRlasso(xtest,object,resp=resp)
+    out <- scorer_LRlasso(as.matrix(xtest),object,resp=resp)
   if( class(object) == 'randomForest' )
     out <- scorer_RF(xtest,object,resp=resp)
   return(out)

@@ -34,35 +34,30 @@
 #' @export
 
 WMCT <- function(pcbc, tcga, G="SC", adjust = 'fdr', njob = 1){
-  # non G + healthy vs G
+  message(sprintf("non %s + healthy vs %s Wilcoxon Multiple Comparision test", G,G))
 
   # Selecting only overlaping features
-  stopifnot(G%in%levels(pcbc[,1]))
+  stopifnot(G%in%pcbc[[key(pcbc)]])
   stopifnot(adjust%in%c("holm", "hochberg", "hommel", "bonferroni",
                         "BH", "BY", "fdr", "none"))
   comm <- intersect(colnames(pcbc), colnames(tcga))
-
+  
+  wt <- function(feature){
+    x <- list(healthy = tcga[, feature, with=FALSE],
+              nonG = pcbc[!G , feature, with=FALSE ])
+    x <- as.numeric(unlist(x))
+    y <- unlist(pcbc[G , feature, with=FALSE])
+    wt <- wilcox.test(x, y, alternative = 'two.sided', paired = FALSE)
+    return(wt$p.value)
+  }
+  
   if( njob>1 ){
     cl <- makeCluster(njob)
-    clusterExport(cl = cl, c("comm","pcbc","tcga","G"), envir = environment())
-    parSapply(cl, comm, function(feature){
-      x <- list(healthy = tcga[, feature],
-                nonG = pcbc[pcbc$class!=G , feature ])
-      x <- as.numeric(unlist(x))
-      y <- pcbc[pcbc$class==G , feature ]
-      wt <- wilcox.test(x, y, alternative = 'two.sided', paired = FALSE)
-      return(wt$p.value)
-    }) -> WT
+    clusterExport(cl = cl, c("comm","pcbc","tcga","G","wt"), envir = environment())
+    parSapply(cl, comm, wt) -> WT
     stopCluster(cl)
   } else {
-    sapply(comm, function(feature){
-      x <- list(healthy = tcga[, feature],
-                nonG = pcbc[pcbc$class!=G , feature ])
-      x <- as.numeric(unlist(x))
-      y <- pcbc[pcbc$class==G , feature ]
-      wt <- wilcox.test(x, y, alternative = 'two.sided', paired = FALSE)
-      return(wt$p.value)
-    }) -> WT
+    sapply(comm, wt) -> WT
   }
   WT_results <- p.adjust(WT, method = adjust)
   return(list(WT_p.adjusted = WT_results, WT_p.original = WT))

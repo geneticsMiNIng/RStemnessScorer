@@ -43,7 +43,8 @@ plotSignature <- function(x, y, signatures=NULL, horiz=TRUE){
   signatures <- signatures[!sapply(signatures,is.null)]
   common <- Reduce(intersect, signatures)
   all <- unique(unlist(signatures))
-  if( !all(all[all!='(Intercept)'] %in% colnames(x)) ) message('x dataset does not contain all passed signature names.')
+  if( !all(all[all!='(Intercept)'] %in% colnames(x)) ) 
+    message('x dataset does not contain all passed signature names.')
   temp <- as.matrix(x)
   rownames(temp) <- y
   temp <- reshape2::melt(temp)
@@ -71,7 +72,8 @@ g_signature <- function(nm, temp, main, common, all, horiz){
   df <- temp[temp$Var2 %in% nm, ]
   df$class <- as.factor(df$class)
   nm <- df$Var2[!duplicated(df$Var2)]
-  colIND <- (sort(nm)%in%common) & !all(common == all)
+
+  colIND <- (sort(nm)%in%common) & !tryCatch(all(common == all), warning = function(cond) FALSE)
   ggplot(df) +
     geom_boxplot( aes(x=Var2, y=methylation, fill=class) ) +
     ggtitle(main) +

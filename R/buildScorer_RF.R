@@ -13,22 +13,20 @@
 #' @import doSNOW
 #' @import foreach
 
-buildScorer_RF <- function(xdata,ydata, ntree=500, njob=1){
-  stay <- nonNA(cbind(xdata, ydata))
-  xdata <- xdata[stay,]
-  ydata <- ydata[stay]
+buildScorer_RF <- function(xdata,ydata, ntree=500, njob=1, ...){
+
   if( njob>1 ){
     cl <- makeCluster(njob, type="SOCK")
     registerDoSNOW(cl)
     ntr <- floor(ntree/njob)
     rest <- ntree-ntr*njob
     model <- foreach(ntree = c(rep(ntr, njob-1),ntr+rest),
-                     .combine = combine,
+                     .combine = randomForest::combine,
                      .packages = "randomForest") %dopar%
-      randomForest(x=xdata, y=ydata, ntree = ntree, nodesize = 1)
+      randomForest(x=xdata, y=ydata, ntree = ntree, nodesize = 1, ...)
     stopCluster(cl)
   } else {
-    model <- randomForest(xdata,ydata, ntree = ntree, nodesize = 1)
+    model <- randomForest(xdata,ydata, ntree = ntree, nodesize = 1, ...)
   }
   return(model)
 }

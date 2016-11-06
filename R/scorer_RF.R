@@ -13,8 +13,12 @@ scorer_RF <- function(xtest, object, resp=2){
   imp0 <- imp[importance(object)==0]
   xtest[, imp0] <- 0
   pred <- rep(NA,nrow(xtest))
-  sty <- nonNA(xtest)
-  p <- randomForest:::predict.randomForest(object, newdata = xtest[sty,], type='prob')[,resp]
-  pred[sty] <- p
+  features <- rownames(object$importance)
+  xtest <- xtest[, features, with=FALSE]
+  nas <- apply(xtest,1,function(x) any(is.na(x)))
+  p <- randomForest:::predict.randomForest(object, 
+                                           newdata = as.matrix(xtest)[!nas,], 
+                                           type='prob')[,resp]
+  pred[!nas] <- p
   return(pred)
 }
